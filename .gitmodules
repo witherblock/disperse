@@ -6,4 +6,4 @@
 	url = https://github.com/Uniswap/permit2
 [submodule "protocol/core/lib/openzeppelin-contracts"]
 	path = protocol/core/lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+	url = https://github.com/Openzeppelin/openzeppelin-contracts

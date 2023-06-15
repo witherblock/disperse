@@ -6,9 +6,11 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {},
+    "evm": {},
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "dependsOn": ["evm"]
     },
     "test": {},
     "compile": {}

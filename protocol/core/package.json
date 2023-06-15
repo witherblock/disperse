@@ -1,13 +1,11 @@
 {
   "name": "@disperse/core",
+  "license": "MIT",
   "version": "0.0.0",
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "4.8.3",
-    "dotenv": "^16.0.3"
+    "test": "hardhat test && forge test -vvv",
+    "evm": "hardhat node"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
@@ -16,8 +14,8 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
-    "@typechain/ethers-v5": "^10.1.0",
-    "@typechain/hardhat": "^6.1.2",
+    "@typechain/ethers-v5": "^11.0.0",
+    "@typechain/hardhat": "^7",
     "@types/mocha": ">=9.1.0",
     "@uniswap/permit2-sdk": "^1.2.0",
     "chai": "^4.2.0",
@@ -26,6 +24,7 @@
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.1",
     "ts-node": "^10.9.1",
-    "typechain": "^8.1.0"
+    "typechain": "^8.1.0",
+    "dotenv": "^16.0.3"
   }
 }

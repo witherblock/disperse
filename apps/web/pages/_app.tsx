@@ -27,7 +27,8 @@ const { chains, provider } = configureChains(
 );
 
 const { connectors } = getDefaultWallets({
-  appName: "disperse.xyz",
+  appName: "disperse",
+  projectId: "disperse",
   chains,
 });
 
