@@ -3,9 +3,9 @@
   "license": "MIT",
   "version": "0.0.0",
   "scripts": {
-    "compile": "hardhat compile",
-    "test": "hardhat test && forge test -vvv",
-    "evm": "hardhat node"
+    "compile": "hardhat compile && forge build",
+    "test": "cross-env CHAIN_ID=42161 hardhat test && forge test -vvv",
+    "evm": "cross-env CHAIN_ID=1337 hardhat node"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
@@ -19,12 +19,13 @@
     "@types/mocha": ">=9.1.0",
     "@uniswap/permit2-sdk": "^1.2.0",
     "chai": "^4.2.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
     "hardhat": "^2.14.0",
     "hardhat-deploy": "^0.11.28",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.1",
     "ts-node": "^10.9.1",
-    "typechain": "^8.1.0",
-    "dotenv": "^16.0.3"
+    "typechain": "^8.1.0"
   }
 }
