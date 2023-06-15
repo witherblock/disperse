@@ -1,0 +1,9 @@
+[submodule "protocol/core/lib/forge-std"]
+	path = protocol/core/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "protocol/core/lib/permit2"]
+	path = protocol/core/lib/permit2
+	url = https://github.com/Uniswap/permit2
+[submodule "protocol/core/lib/openzeppelin-contracts"]
+	path = protocol/core/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

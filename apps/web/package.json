@@ -9,17 +9,22 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@nextui-org/react": "1.0.0-beta.13",
+    "@rainbow-me/rainbowkit": "^0.12.12",
+    "@uniswap/permit2-sdk": "^1.2.0",
+    "ethers": "^5",
     "next": "latest",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "ui": "workspace:*"
+    "next-themes": "^0.2.1",
+    "react": "18.0.0",
+    "react-dom": "18.0.0",
+    "wagmi": "^0.12.13"
   },
   "devDependencies": {
     "@types/node": "^17.0.12",
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
     "typescript": "^4.5.3"
   }
 }
