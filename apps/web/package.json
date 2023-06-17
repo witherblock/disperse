@@ -9,22 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
     "@nextui-org/react": "1.0.0-beta.13",
-    "@rainbow-me/rainbowkit": "^0.12.12",
-    "@uniswap/permit2-sdk": "^1.2.0",
-    "ethers": "^5",
+    "@rainbow-me/rainbowkit": "^1",
     "next": "latest",
     "next-themes": "^0.2.1",
-    "react": "18.0.0",
-    "react-dom": "18.0.0",
-    "wagmi": "^0.12.13"
+    "permit2-sdk-viem": "https://github.com/witherblock/permit2-sdk-viem",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "viem": "^1.0.7",
+    "wagmi": "^1"
   },
   "devDependencies": {
-    "@types/node": "^17.0.12",
+    "@types/node": "^18",
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
     "eslint-config-custom": "*",
     "tsconfig": "*",
-    "typescript": "^4.5.3"
+    "typescript": "^5.1.3"
   }
 }

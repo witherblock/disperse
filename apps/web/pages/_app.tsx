@@ -1,13 +1,13 @@
 import * as React from "react";
 import type { AppProps } from "next/app";
-import { createTheme, CssBaseline, NextUIProvider } from "@nextui-org/react";
+import { createTheme, NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import {
   getDefaultWallets,
   RainbowKitProvider,
   darkTheme,
 } from "@rainbow-me/rainbowkit";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, localhost } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
@@ -21,8 +21,8 @@ const nextUiDarkTheme = createTheme({
   type: "dark",
 });
 
-const { chains, provider } = configureChains(
-  [mainnet, polygon, optimism, arbitrum, localhost],
+const { chains, publicClient } = configureChains(
+  [localhost, mainnet, polygon, optimism, arbitrum],
   [publicProvider()]
 );
 
@@ -32,15 +32,15 @@ const { connectors } = getDefaultWallets({
   chains,
 });
 
-const wagmiClient = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
-  provider,
+  publicClient,
 });
 
 function App({ Component }: AppProps) {
   return (
-    <WagmiConfig client={wagmiClient}>
+    <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider
         chains={chains}
         theme={darkTheme()}
@@ -55,7 +55,6 @@ function App({ Component }: AppProps) {
           }}
         >
           <NextUIProvider>
-            {CssBaseline.flush()}
             <Component />
           </NextUIProvider>
         </NextThemesProvider>

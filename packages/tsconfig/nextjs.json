@@ -12,8 +12,7 @@
     "module": "esnext",
     "noEmit": true,
     "resolveJsonModule": true,
-    "target": "es5",
-    "strict": false
+    "target": "ESNext"
   },
   "include": ["src", "next-env.d.ts"],
   "exclude": ["node_modules"]

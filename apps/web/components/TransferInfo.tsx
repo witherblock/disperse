@@ -1,55 +1,56 @@
 import {
-  useContractReads,
   useAccount,
   erc20ABI,
   Address,
   useContractRead,
+  useToken,
 } from "wagmi";
-import { BigNumber, utils as ethersUtils } from "ethers";
+import { formatUnits } from "viem";
+import TokenBalance from "./TokenBalance";
 
 export default function TransferInfo({
   address,
   totalValue,
 }: {
   address: Address;
-  totalValue: BigNumber;
+  totalValue: bigint;
 }) {
   const account = useAccount();
 
-  const reads = useContractReads({
-    contracts: [
-      {
-        abi: erc20ABI,
-        address,
-        functionName: "decimals",
-      },
-      {
-        abi: erc20ABI,
-        address,
-        functionName: "balanceOf",
-        args: [account?.address],
-      },
-    ],
+  const { data, isError, isLoading } = useToken({
+    address,
   });
 
-  if (reads.isLoading || !reads.data) return <div>Loading</div>;
-  if (reads.isError) return <div>Error fetching</div>;
+  const balance = useContractRead({
+    abi: erc20ABI,
+    address,
+    functionName: "balanceOf",
+    args: [account?.address || "0x"],
+  });
 
-  console.log(reads.data[0]);
+  if (isLoading || !data) return <div>Loading</div>;
+  if (isError) return <div>Error fetching</div>;
 
   return (
     <div>
-      <p>Total Value: {ethersUtils.formatUnits(totalValue, reads.data[0])}</p>
-      <p>
-        Your Balance: {ethersUtils.formatUnits(reads.data[1], reads.data[0])}
-      </p>
-      <p>
+      <div>Total Value: {formatUnits(totalValue, data?.decimals || 18)}</div>
+      <div>
+        Your Balance:{" "}
+        {account.address ? (
+          <TokenBalance
+            userAddress={account.address}
+            contractAddress={address}
+            decimals={data?.decimals || 18}
+          />
+        ) : null}
+      </div>
+      <div>
         Remaining:{" "}
-        {ethersUtils.formatUnits(
-          reads.data[1].sub(totalValue.mul(reads.data[0])),
-          reads.data[0]
+        {formatUnits(
+          balance?.data || 0n - totalValue * BigInt(data?.decimals || 18),
+          data?.decimals || 18
         )}
-      </p>
+      </div>
     </div>
   );
 }

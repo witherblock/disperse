@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { Dropdown, Input, Spacer, Textarea, styled } from "@nextui-org/react";
-import { BigNumber, utils as ethersUtils } from "ethers";
+import { Address } from "wagmi";
 
 import AppBar from "../components/AppBar";
 import TokenInfo from "../components/TokenInfo";
 import Send from "../components/Send";
-import { Address, useAccount } from "wagmi";
 import TransferInfo from "../components/TransferInfo";
+import ClientComponent from "../components/ClientComponent";
+import { isAddress } from "viem";
 
 const Box = styled(`div`);
 
@@ -15,7 +16,7 @@ const tokens = [
   { key: "ERC20", name: "ERC20" },
 ];
 
-export default function Web() {
+const Web = () => {
   const [selected, setSelected] = useState(new Set(["ETH"]));
   const [address, setAddress] = useState<Address>(
     "0xda5bb55c0eA3f77321A888CA202cb84aE30C6AF5"
@@ -27,7 +28,7 @@ export default function Web() {
     recipients: [],
     values: [],
   });
-  const [totalValue, setTotalValue] = useState(BigNumber.from(0));
+  const [totalValue, setTotalValue] = useState(0n);
   const [error, setError] = useState("");
 
   const selectedValue = useMemo(
@@ -38,7 +39,7 @@ export default function Web() {
   const handleChange = (e: { target: { value: any } }) => {
     const value = e.target.value;
 
-    if (ethersUtils.isAddress(value)) {
+    if (isAddress(value)) {
       setAddress(value);
       setError("");
     } else setError("Invalid Address");
@@ -65,10 +66,7 @@ export default function Web() {
     const recipients = splitLines.map((a) => a[0]);
     const values = splitLines.map((a) => a[1]);
 
-    const _totalValue = values.reduce(
-      (acc, v) => acc.add(BigNumber.from(v)),
-      BigNumber.from("0")
-    );
+    const _totalValue = values.reduce((acc, v) => acc + BigInt(v), 0n);
 
     setTotalValue(_totalValue);
 
@@ -121,7 +119,7 @@ export default function Web() {
               />
             ) : null}
           </Box>
-          {address !== "0x" ? <TokenInfo address={address} /> : null}
+          <TokenInfo address={address} />
           <Spacer />
           <Textarea
             width="520px"
@@ -136,14 +134,22 @@ export default function Web() {
             <TransferInfo address={address} totalValue={totalValue} />
           ) : null}
           <Spacer />
-          {/* <Send
+          <Send
             totalValue={totalValue}
             isNative={selectedValue === "ETH"}
             tokenAddress={address}
             transferDetails={transferDetails}
-          /> */}
+          />
         </Box>
       </Box>
     </>
+  );
+};
+
+export default function WebPage() {
+  return (
+    <ClientComponent>
+      <Web />
+    </ClientComponent>
   );
 }

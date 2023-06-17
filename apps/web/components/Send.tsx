@@ -1,49 +1,37 @@
-import {
-  erc20ABI,
-  useContract,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-  useProvider,
-  useSigner,
-  Address,
-} from "wagmi";
+import { useEffect, useState } from "react";
+import { erc20ABI, usePublicClient, useWalletClient } from "wagmi";
 import { Button } from "@nextui-org/react";
+import { getContract, Address } from "viem";
 
 import {
-  // permit2 contract address
   PERMIT2_ADDRESS,
-  // the type of permit that we need to sign
-  // this will help us get domain, types and values that we need to create a signature
   AllowanceTransfer,
   AllowanceProvider,
   MaxUint48,
+  MaxUint256,
   AllowanceData,
-} from "@uniswap/permit2-sdk";
+} from "permit2-sdk-viem";
 
 import disperseAbi from "../constants/abis/disperse";
-import { useEffect, useState } from "react";
-import { BigNumber } from "ethers";
-import { MaxUint256 } from "@uniswap/permit2-sdk";
 
-const TOKEN_ADDRESS = "0xda5bb55c0eA3f77321A888CA202cb84aE30C6AF5";
+// const TOKEN_ADDRESS = "0xda5bb55c0eA3f77321A888CA202cb84aE30C6AF5";
 const DISPERSE_ADDRESS = "0xC5ac98C06391981A4802A31ca5C62e6c3EfdA48d";
 
 interface PermitSingle {
   details: {
     token: `0x${string}`;
-    amount: BigNumber;
+    amount: bigint;
     expiration: number;
     nonce: number;
   };
   spender: `0x${string}`;
-  sigDeadline: BigNumber;
+  sigDeadline: bigint;
 }
 
 const Send = ({
   tokenAddress,
   transferDetails,
-  isNative,
+  // isNative,
   totalValue,
 }: {
   isNative: boolean;
@@ -52,72 +40,75 @@ const Send = ({
     recipients: Address[];
     values: string[];
   };
-  totalValue: BigNumber;
+  totalValue: bigint;
 }) => {
-  const token = useContract({
-    address: tokenAddress,
-    abi: erc20ABI,
-  });
+  const walletClient = useWalletClient();
+  const publicClient = usePublicClient();
 
   const [allowanceData, setAllowanceData] = useState<AllowanceData | null>(
     null
   );
 
-  const signer = useSigner();
-
-  const disperse = useContract({
-    abi: disperseAbi,
-    address: DISPERSE_ADDRESS,
-    signerOrProvider: signer.data,
-  });
-
-  const provider = useProvider();
-
   const handleClick = async () => {
-    if (!allowanceData) return;
+    if (!allowanceData || !walletClient.data) return;
 
-    if (allowanceData.amount.lt(totalValue)) {
+    const token = getContract({
+      address: tokenAddress,
+      abi: erc20ABI,
+      walletClient: walletClient.data,
+    });
+
+    if (allowanceData.amount <= totalValue) {
       try {
-        await token?.approve(PERMIT2_ADDRESS, MaxUint256);
+        await token.write.approve([PERMIT2_ADDRESS as Address, MaxUint256]);
       } catch {
         return;
       }
     }
 
+    const disperse = getContract({
+      abi: disperseAbi,
+      address: DISPERSE_ADDRESS,
+      walletClient: walletClient.data,
+    });
+
     const permit: PermitSingle = {
       details: {
         token: tokenAddress,
-        amount: BigNumber.from(1),
-        expiration: MaxUint48.toNumber(),
+        amount: 1n,
+        expiration: Number(MaxUint48),
         nonce: allowanceData.nonce,
       },
       spender: disperse?.address || "0x",
       sigDeadline: MaxUint48,
     };
 
-    console.log(permit);
-
     const { domain, types, values } = AllowanceTransfer.getPermitData(
       permit,
       PERMIT2_ADDRESS,
       1337
     );
-    //@ts-ignore
-    let signature = await signer.data._signTypedData(domain, types, values);
 
-    const fire = await disperse?.disperseSingleWithPermit2(
+    let signature = await walletClient.data.signTypedData({
+      domain,
+      types,
+      //@ts-ignore
+      values,
+    });
+
+    await disperse.write.disperseSingleWithPermit2([
       tokenAddress,
       transferDetails.recipients,
-      transferDetails.values.map((v) => BigNumber.from(v)),
+      transferDetails.values.map((v) => BigInt(v)),
       permit,
-      signature
-    );
+      signature,
+    ]);
   };
 
   useEffect(() => {
     async function update() {
       const allowanceProvider = new AllowanceProvider(
-        provider,
+        publicClient,
         PERMIT2_ADDRESS
       );
 
@@ -131,7 +122,7 @@ const Send = ({
     }
 
     update();
-  }, [provider]);
+  }, [publicClient]);
 
   return (
     <Button color="default" onClick={handleClick}>

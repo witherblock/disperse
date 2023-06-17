@@ -1,4 +1,4 @@
-import { Button, Navbar, Text } from "@nextui-org/react";
+import { Navbar, Text } from "@nextui-org/react";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
