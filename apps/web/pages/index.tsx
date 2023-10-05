@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { Dropdown, Input, Spacer, Textarea, styled } from "@nextui-org/react";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Input,
+  Textarea,
+  Button,
+} from "@nextui-org/react";
 import { Address } from "wagmi";
 
 import AppBar from "../components/AppBar";
@@ -8,8 +16,6 @@ import Send from "../components/Send";
 import TransferInfo from "../components/TransferInfo";
 import ClientComponent from "../components/ClientComponent";
 import { isAddress } from "viem";
-
-const Box = styled(`div`);
 
 const tokens = [
   { key: "ETH", name: "ETH (Native)" },
@@ -73,25 +79,27 @@ const Web = () => {
     setTransferDetails({ recipients: recipients as Address[], values });
   };
 
+  console.log(selectedValue);
   return (
-    <>
+    <div className="bg-black h-screen w-full">
       <AppBar />
-      <Box css={{ width: "100%", justifyItems: "center", display: "flex" }}>
-        <Box className="mx-auto my-5" css={{ mx: "auto", my: "20px" }}>
-          <h1>Disperse</h1>
-          <Box
-            className="flex mb-6"
-            css={{ display: "flex", marginBottom: "24px" }}
-          >
+      <div className="w-100 justify-items-center flex">
+        <div className="mx-auto my-8 w-1/3">
+          <h1 className="text-white text-2 text-5xl text-left font-bold w-full mb-8">
+            Disperse
+          </h1>
+          <div className="flex mb-6">
             <Dropdown>
-              <Dropdown.Button
-                color={selectedValue === "ETH" ? "secondary" : "gradient"}
-                css={{ mr: "8px" }}
-                flat
-              >
-                {selectedValue}
-              </Dropdown.Button>
-              <Dropdown.Menu
+              <DropdownTrigger className="mr-4">
+                <Button
+                  color={selectedValue == "ERC2O" ? "secondary" : "secondary"}
+                  size="lg"
+                  variant="flat"
+                >
+                  {selectedValue}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
                 aria-label="Token Selector"
                 disallowEmptySelection
                 selectionMode="single"
@@ -101,26 +109,24 @@ const Web = () => {
                 items={tokens}
               >
                 {(item) => (
-                  <Dropdown.Item key={(item as any).key}>
+                  <DropdownItem key={(item as any).key}>
                     {(item as any).name}
-                  </Dropdown.Item>
+                  </DropdownItem>
                 )}
-              </Dropdown.Menu>
+              </DropdownMenu>
             </Dropdown>
             {selectedValue === "ERC20" ? (
-              <Input
-                onChange={handleChange}
-                placeholder="Enter token address here"
-                width="400px"
-                status={error ? "error" : "default"}
-                color={error ? "error" : "default"}
-                helperColor={error ? "error" : "default"}
-                helperText={error}
-              />
+              <div className="w-full">
+                <Input
+                  onChange={handleChange}
+                  placeholder="Enter token address here"
+                  size="lg"
+                  color={error ? "danger" : "default"}
+                />
+              </div>
             ) : null}
-          </Box>
+          </div>
           <TokenInfo address={address} />
-          <Spacer />
           <Textarea
             width="520px"
             placeholder="0x314ab97b76e39d63c78d5c86c2daf8eaa306b182 3.141592
@@ -129,20 +135,18 @@ const Web = () => {
             rows={6}
             onChange={handleTextareaChange}
           />
-          <Spacer />
           {address !== "0x" ? (
             <TransferInfo address={address} totalValue={totalValue} />
           ) : null}
-          <Spacer />
           <Send
             totalValue={totalValue}
             isNative={selectedValue === "ETH"}
             tokenAddress={address}
             transferDetails={transferDetails}
           />
-        </Box>
-      </Box>
-    </>
+        </div>
+      </div>
+    </div>
   );
 };
 

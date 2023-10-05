@@ -1,20 +1,16 @@
-import { Navbar, Text } from "@nextui-org/react";
-
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function AppBar() {
   return (
-    <Navbar isBordered variant="sticky">
-      <Navbar.Brand>
-        <Text b color="inherit" hideIn="xs">
-          Disperse
-        </Text>
-      </Navbar.Brand>
-      <Navbar.Content>
-        <Navbar.Item>
+    <nav className="w-full">
+      <div className="flex w-9/12 py-6 mx-auto border-b-1 border-white border-opacity-20">
+        <div className="font-bold text-white justify-start w-full items-center flex">
+          <p>Disperse</p>
+        </div>
+        <div className="justify-end w-full flex">
           <ConnectButton />
-        </Navbar.Item>
-      </Navbar.Content>
-    </Navbar>
+        </div>
+      </div>
+    </nav>
   );
 }

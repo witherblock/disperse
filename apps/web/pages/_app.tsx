@@ -1,7 +1,6 @@
 import * as React from "react";
 import type { AppProps } from "next/app";
-import { createTheme, NextUIProvider } from "@nextui-org/react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { NextUIProvider } from "@nextui-org/react";
 import {
   getDefaultWallets,
   RainbowKitProvider,
@@ -11,15 +10,8 @@ import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, localhost } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
+import "../styles/global.css";
 import "@rainbow-me/rainbowkit/styles.css";
-
-const nextUiLightTheme = createTheme({
-  type: "light",
-});
-
-const nextUiDarkTheme = createTheme({
-  type: "dark",
-});
 
 const { chains, publicClient } = configureChains(
   [localhost, mainnet, polygon, optimism, arbitrum],
@@ -46,18 +38,11 @@ function App({ Component }: AppProps) {
         theme={darkTheme()}
         showRecentTransactions={true}
       >
-        <NextThemesProvider
-          defaultTheme="dark"
-          attribute="class"
-          value={{
-            light: nextUiLightTheme.className,
-            dark: nextUiDarkTheme.className,
-          }}
-        >
-          <NextUIProvider>
+        <NextUIProvider>
+          <main className="dark text-foreground bg-background">
             <Component />
-          </NextUIProvider>
-        </NextThemesProvider>
+          </main>
+        </NextUIProvider>
       </RainbowKitProvider>
     </WagmiConfig>
   );
