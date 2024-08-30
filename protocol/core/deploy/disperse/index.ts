@@ -23,24 +23,9 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const token = Token__factory.connect(testToken.address, signers[0]);
 
   await token.mint(
-    "0x4643CCf56721Ea65B03F2bd899231C828A21d314",
+    "0xDe485812E28824e542B9c2270B6b8eD9232B7D0b",
     hre.ethers.utils.parseEther("1000")
   );
-
-  //   const gmxPutPriceOracle = await deployments.deploy("GmxPutPriceOracleV2", {
-  //     from: deployer,
-  //     log: true,
-  //   });
-
-  //   const gmxPutWeeklySsov = SsovV3__factory.connect(
-  //     "0xf071F0c56543A2671a2Dfc5FF51d5d858Be91514",
-  //     signers[0]
-  //   );
-
-  //   await gmxPutWeeklySsov.setAddresses({
-  //     ...(await gmxPutWeeklySsov.addresses()),
-  //     priceOracle: gmxPutPriceOracle.address,
-  //   });
 };
 
 export default deploy;

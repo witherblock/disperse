@@ -1,7 +1,12 @@
-import { useEffect, useState } from "react";
-import { erc20ABI, usePublicClient, useWalletClient } from "wagmi";
+import { useCallback, useEffect, useState } from "react";
+import {
+  useAccount,
+  usePublicClient,
+  useReadContract,
+  useWalletClient,
+} from "wagmi";
 import { Button } from "@nextui-org/react";
-import { getContract, Address } from "viem";
+import { getContract, Address, erc20Abi, parseUnits } from "viem";
 
 import {
   PERMIT2_ADDRESS,
@@ -14,9 +19,7 @@ import {
 
 import disperseAbi from "../constants/abis/disperse";
 
-// const TOKEN_ADDRESS = "0xda5bb55c0eA3f77321A888CA202cb84aE30C6AF5";
 const DISPERSE_ADDRESS = "0xC5ac98C06391981A4802A31ca5C62e6c3EfdA48d";
-
 interface PermitSingle {
   details: {
     token: `0x${string}`;
@@ -31,34 +34,60 @@ interface PermitSingle {
 const Send = ({
   tokenAddress,
   transferDetails,
-  // isNative,
   totalValue,
 }: {
-  isNative: boolean;
   tokenAddress: `0x${string}`;
   transferDetails: {
     recipients: Address[];
     values: string[];
   };
-  totalValue: bigint;
+  totalValue: number;
 }) => {
   const walletClient = useWalletClient();
   const publicClient = usePublicClient();
+
+  const result = useReadContract({
+    abi: erc20Abi,
+    address: tokenAddress,
+    functionName: "decimals",
+  });
+
+  const account = useAccount();
 
   const [allowanceData, setAllowanceData] = useState<AllowanceData | null>(
     null
   );
 
-  const handleClick = async () => {
-    if (!allowanceData || !walletClient.data) return;
+  const handleClick = useCallback(async () => {
+    if (
+      !allowanceData ||
+      !walletClient.data ||
+      !result.data ||
+      !account.address ||
+      !publicClient
+    )
+      return;
+
+    const disperse = getContract({
+      abi: disperseAbi,
+      address: DISPERSE_ADDRESS,
+      client: { wallet: walletClient.data },
+    });
 
     const token = getContract({
       address: tokenAddress,
-      abi: erc20ABI,
-      walletClient: walletClient.data,
+      abi: erc20Abi,
+      client: { wallet: walletClient.data },
     });
 
-    if (allowanceData.amount <= totalValue) {
+    const data = await publicClient?.readContract({
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "allowance",
+      args: [account.address, PERMIT2_ADDRESS],
+    });
+
+    if (data <= parseUnits(String(totalValue), result.data)) {
       try {
         await token.write.approve([PERMIT2_ADDRESS as Address, MaxUint256]);
       } catch {
@@ -66,16 +95,10 @@ const Send = ({
       }
     }
 
-    const disperse = getContract({
-      abi: disperseAbi,
-      address: DISPERSE_ADDRESS,
-      walletClient: walletClient.data,
-    });
-
     const permit: PermitSingle = {
       details: {
         token: tokenAddress,
-        amount: 1n,
+        amount: parseUnits(String(totalValue), result.data),
         expiration: Number(MaxUint48),
         nonce: allowanceData.nonce,
       },
@@ -92,37 +115,49 @@ const Send = ({
     let signature = await walletClient.data.signTypedData({
       domain,
       types,
-      //@ts-ignore
-      values,
+      primaryType: "PermitSingle",
+      message: { ...values },
     });
 
     await disperse.write.disperseSingleWithPermit2([
       tokenAddress,
       transferDetails.recipients,
-      transferDetails.values.map((v) => BigInt(v)),
+      transferDetails.values.map((v) => parseUnits(v, result.data)),
       permit,
       signature,
     ]);
-  };
+  }, [
+    account.address,
+    allowanceData,
+    publicClient,
+    result.data,
+    tokenAddress,
+    totalValue,
+    transferDetails.recipients,
+    transferDetails.values,
+    walletClient.data,
+  ]);
 
   useEffect(() => {
     async function update() {
-      const allowanceProvider = new AllowanceProvider(
-        publicClient,
-        PERMIT2_ADDRESS
-      );
+      if (publicClient && account.address) {
+        const allowanceProvider = new AllowanceProvider(
+          publicClient,
+          PERMIT2_ADDRESS
+        );
 
-      const allowanceData = await allowanceProvider.getAllowanceData(
-        "0xda5bb55c0eA3f77321A888CA202cb84aE30C6AF5",
-        "0xDe485812E28824e542B9c2270B6b8eD9232B7D0b",
-        "0xC5ac98C06391981A4802A31ca5C62e6c3EfdA48d"
-      );
+        const allowanceData = await allowanceProvider.getAllowanceData(
+          tokenAddress,
+          account.address,
+          DISPERSE_ADDRESS
+        );
 
-      setAllowanceData(allowanceData);
+        setAllowanceData(allowanceData);
+      }
     }
 
     update();
-  }, [publicClient]);
+  }, [publicClient, account.address, tokenAddress]);
 
   return (
     <Button color="default" onClick={handleClick}>

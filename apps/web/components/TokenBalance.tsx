@@ -1,5 +1,5 @@
-import { Address, formatUnits } from "viem";
-import { erc20ABI, useContractRead } from "wagmi";
+import { Address, erc20Abi, formatUnits } from "viem";
+import { useReadContract } from "wagmi";
 
 interface TokenBalanceProps {
   contractAddress: Address;
@@ -12,8 +12,8 @@ const TokenBalance = ({
   userAddress,
   decimals,
 }: TokenBalanceProps) => {
-  const balance = useContractRead({
-    abi: erc20ABI,
+  const balance = useReadContract({
+    abi: erc20Abi,
     address: contractAddress,
     functionName: "balanceOf",
     args: [userAddress],

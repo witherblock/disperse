@@ -1,25 +1,47 @@
-import { useToken, useAccount } from "wagmi";
+import { useAccount, useReadContracts } from "wagmi";
 import TokenBalance from "./TokenBalance";
+import { erc20Abi, zeroAddress } from "viem";
 
 export default function TokenInfo({ address }: { address: `0x${string}` }) {
-  const { data, isError, isLoading } = useToken({
+  const token = {
     address,
+    abi: erc20Abi,
+  };
+
+  const { data, isError, isLoading } = useReadContracts({
+    allowFailure: false,
+    contracts: [
+      {
+        ...token,
+        functionName: "symbol",
+      },
+      {
+        ...token,
+        functionName: "name",
+      },
+      {
+        ...token,
+        functionName: "decimals",
+      },
+    ],
   });
 
   const account = useAccount();
 
-  if (isLoading) return <div>Fetching token…</div>;
-  if (isError) return <div>Error fetching token</div>;
+  if (address === zeroAddress) return <></>;
+
+  if (isLoading) return <div className="mb-4">Fetching token…</div>;
+  if (isError || !data) return <div className="mb-4">Error fetching token</div>;
 
   return (
-    <div>
-      <p>Symbol: {data?.symbol}</p>
-      <p>Name: {data?.name}</p>
+    <div className="mb-4">
+      <p>Symbol: {data[0]}</p>
+      <p>Name: {data[1]}</p>
       {account.address ? (
         <TokenBalance
           userAddress={account.address}
           contractAddress={address}
-          decimals={data?.decimals || 18}
+          decimals={data[2] || 18}
         />
       ) : null}
     </div>

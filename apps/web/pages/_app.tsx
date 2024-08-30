@@ -2,49 +2,47 @@ import * as React from "react";
 import type { AppProps } from "next/app";
 import { NextUIProvider } from "@nextui-org/react";
 import {
-  getDefaultWallets,
   RainbowKitProvider,
   darkTheme,
+  getDefaultConfig,
 } from "@rainbow-me/rainbowkit";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
+import { http, WagmiProvider } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, localhost } from "wagmi/chains";
-import { publicProvider } from "wagmi/providers/public";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import "../styles/global.css";
+import { WALLET_CONNECT_PROJECT_ID } from "../constants/env";
+
 import "@rainbow-me/rainbowkit/styles.css";
+import "../styles/global.css";
 
-const { chains, publicClient } = configureChains(
-  [localhost, mainnet, polygon, optimism, arbitrum],
-  [publicProvider()]
-);
-
-const { connectors } = getDefaultWallets({
+const config = getDefaultConfig({
   appName: "disperse",
-  projectId: "disperse",
-  chains,
+  projectId: WALLET_CONNECT_PROJECT_ID || "",
+  chains: [localhost, mainnet, polygon, optimism, arbitrum],
+  transports: {
+    [localhost.id]: http("http://localhost:8545"),
+    [mainnet.id]: http(),
+    [polygon.id]: http(),
+    [optimism.id]: http(),
+    [arbitrum.id]: http(),
+  },
 });
 
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-});
+const queryClient = new QueryClient();
 
 function App({ Component }: AppProps) {
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider
-        chains={chains}
-        theme={darkTheme()}
-        showRecentTransactions={true}
-      >
-        <NextUIProvider>
-          <main className="dark text-foreground bg-background">
-            <Component />
-          </main>
-        </NextUIProvider>
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <QueryClientProvider client={queryClient}>
+      <WagmiProvider config={config}>
+        <RainbowKitProvider theme={darkTheme()} showRecentTransactions={true}>
+          <NextUIProvider>
+            <main className="dark text-foreground bg-background">
+              <Component />
+            </main>
+          </NextUIProvider>
+        </RainbowKitProvider>
+      </WagmiProvider>
+    </QueryClientProvider>
   );
 }
 

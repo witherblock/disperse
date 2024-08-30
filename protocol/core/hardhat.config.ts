@@ -21,13 +21,9 @@ const config = {
     ],
   },
   networks: {
-    mumbai: {
-      url: "https://polygon-mumbai.g.alchemy.com/v2/HEFzTlxm4zKrEgDAhTte61ZpqhcRGPEO",
-      accounts: [process.env.PRIVATE_KEY || ""],
-    },
     hardhat: {
       forking: {
-        url: "https://arb-mainnet.g.alchemy.com/v2/MAMAPFQJjmCYzKSeCsBBSc4Ptblu9GYL",
+        url: process.env.ARBITRUM_RPC_URL,
         blockNumber: 87830000,
       },
       chainId: Number(process.env.CHAIN_ID),

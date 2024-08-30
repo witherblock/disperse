@@ -1,11 +1,5 @@
-import {
-  useAccount,
-  erc20ABI,
-  Address,
-  useContractRead,
-  useToken,
-} from "wagmi";
-import { formatUnits } from "viem";
+import { useAccount, useReadContracts } from "wagmi";
+import { Address, erc20Abi, formatUnits, parseUnits, zeroAddress } from "viem";
 import TokenBalance from "./TokenBalance";
 
 export default function TransferInfo({
@@ -13,42 +7,44 @@ export default function TransferInfo({
   totalValue,
 }: {
   address: Address;
-  totalValue: bigint;
+  totalValue: number;
 }) {
   const account = useAccount();
 
-  const { data, isError, isLoading } = useToken({
-    address,
+  const token = { address, abi: erc20Abi };
+
+  const { data, isError, isLoading } = useReadContracts({
+    allowFailure: false,
+    contracts: [
+      {
+        ...token,
+        functionName: "decimals",
+      },
+      { ...token, functionName: "balanceOf", args: [account?.address || "0x"] },
+    ],
   });
 
-  const balance = useContractRead({
-    abi: erc20ABI,
-    address,
-    functionName: "balanceOf",
-    args: [account?.address || "0x"],
-  });
-
-  if (isLoading || !data) return <div>Loading</div>;
-  if (isError) return <div>Error fetching</div>;
+  if (address === zeroAddress) return <></>;
+  if (isLoading || !data) return <div className="mb-4">Loading</div>;
+  if (isError) return <div className="mb-4">Error fetching</div>;
 
   return (
-    <div>
-      <div>Total Value: {formatUnits(totalValue, data?.decimals || 18)}</div>
+    <div className="mb-4">
+      <div>Total Value: {totalValue}</div>
       <div>
-        Your Balance:{" "}
         {account.address ? (
           <TokenBalance
             userAddress={account.address}
             contractAddress={address}
-            decimals={data?.decimals || 18}
+            decimals={data[0] || 18}
           />
         ) : null}
       </div>
       <div>
         Remaining:{" "}
         {formatUnits(
-          balance?.data || 0n - totalValue * BigInt(data?.decimals || 18),
-          data?.decimals || 18
+          (data[1] || 0n) - parseUnits(String(totalValue), data[0] || 18),
+          data[0] || 18
         )}
       </div>
     </div>
